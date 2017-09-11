@@ -10,6 +10,9 @@ script:
 - dotnet restore
 - cd UnitTestProject1
 - dotnet test
+before_deploy:
+- cd ..
+- cd WebApplication1
 deploy:
   provider: heroku
   api_key:
