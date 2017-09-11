@@ -1,6 +1,10 @@
 language: csharp
 solution: WebApplication1.sln
+mono: none
+dotnet: 2.0.0
 notifications:
   email: false
 services:
   - mysql
+script:
+  - dotnet restore
