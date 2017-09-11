@@ -8,3 +8,5 @@ services:
   - mysql
 script:
   - dotnet restore
+  - cd UnitTestProject1
+  - dotnet test
