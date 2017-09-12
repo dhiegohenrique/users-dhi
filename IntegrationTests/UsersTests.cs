@@ -1,5 +1,3 @@
-using Castle.Core.Logging;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -13,14 +11,12 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using WebApplication1;
-using WebApplication1.Models;
-using WebApplication23.Models;
+using UsersDhi.Models;
 
-namespace UnitTestProject1
+namespace IntegrationTests
 {
     [TestClass]
-    public class UnitTest1
+    public class UsersTests
     {
         private HttpClient client;
 
@@ -30,9 +26,9 @@ namespace UnitTestProject1
 
         private UserContext userContext;
 
-        public UnitTest1() {
+        public UsersTests() {
             TestServer server = new TestServer(new WebHostBuilder()
-           .UseContentRoot(this.GetPathProjects() + Path.DirectorySeparatorChar + "WebApplication1")
+           .UseContentRoot(this.GetPathProjects() + Path.DirectorySeparatorChar + "UsersDhi")
            .ConfigureServices((IServiceCollection services) => {
                services.AddDbContext<UserContext>(dbOptions =>
                     dbOptions.UseInMemoryDatabase("suntech-test"));
@@ -41,7 +37,7 @@ namespace UnitTestProject1
                app.UseMvc();
            })*/
            .UseEnvironment("test")
-           .UseStartup<Startup>());
+           .UseStartup<UsersDhi.Startup>());
             this.client = server.CreateClient();
             this.userContext = server.Host.Services.GetService<UserContext>();
         }

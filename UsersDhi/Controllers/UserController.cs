@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebApplication23.Models;
-using UnitTestProject1.Services;
+using UsersDhi.Models;
+using UsersDhi.Services;
 
-namespace WebApplication1.Controllers
+namespace UsersDhi.Controllers
 {
     [Produces("application/json")]
     [Route("api/user")]

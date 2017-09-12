@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using WebApplication23.Models;
+using UsersDhi.Models;
 
-namespace WebApplication1.Models
+namespace UsersDhi.Models
 {
     public class UserContext : DbContext
     {
@@ -14,6 +14,6 @@ namespace WebApplication1.Models
         {
         }
 
-        public DbSet<WebApplication23.Models.User> User { get; set; }
+        public DbSet<User> User { get; set; }
     }
 }

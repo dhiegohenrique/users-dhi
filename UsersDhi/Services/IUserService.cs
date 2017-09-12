@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using WebApplication23.Models;
+using UsersDhi.Models;
 
-namespace UnitTestProject1.Services
+namespace UsersDhi.Services
 {
     public interface IUserService
     {
@@ -17,5 +16,4 @@ namespace UnitTestProject1.Services
 
         Task<int> Remove(int id);
     }
-
 }

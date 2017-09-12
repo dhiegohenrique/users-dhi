@@ -3,11 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnitTestProject1.Services;
-using WebApplication1.Models;
-using WebApplication23.Models;
+using UsersDhi.Models;
 
-namespace WebApplication1.Services
+namespace UsersDhi.Services
 {
     public class UserServiceImpl : IUserService
     {
