@@ -19,6 +19,10 @@ namespace WebApplication1.Controllers
             this.userService = userService;
         }
 
+        protected UserController()
+        {
+        }
+
         /// <summary>
         /// Retorna todos os usuários.
         /// </summary>

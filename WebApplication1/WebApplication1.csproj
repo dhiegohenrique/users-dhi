@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
     <Folder Include="wwwroot\" />
+    <Content Include="Dockerfile" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
