@@ -29,6 +29,8 @@ namespace WebApplication1
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            CurrentEnvironment = env;
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -84,6 +86,8 @@ namespace WebApplication1
             app.UseMvc();
         }
 
+        private IHostingEnvironment CurrentEnvironment { get; set; }
+
         private void enableCors(IApplicationBuilder app)
         {
             app.UseCors(builder =>
@@ -120,21 +124,18 @@ namespace WebApplication1
         private string getConnectionString()
         {
             string connection = Configuration.GetConnectionString("UserContext");
-            string envName = Environment.GetEnvironmentVariable("ASPNET_ENV");
-            Console.WriteLine("entrou aqui1:" + envName);
-
+            string envName = CurrentEnvironment.EnvironmentName;
             if (envName == null || !envName.ToLower().Equals("Production".ToLower()))
             {
-                Console.WriteLine("entrou aqui2:" + connection);
                 return connection;
             }
 
+            connection = Environment.GetEnvironmentVariable("CLEARDB_DATABASE_URL");
             Uri url;
             bool isUrl = Uri.TryCreate(connection, UriKind.Absolute, out url);
             if (isUrl)
             {
                 connection = $"Server={url.Host};Uid={url.UserInfo.Split(':')[0]};Pwd={url.UserInfo.Split(':')[1]};Database={url.LocalPath.Substring(1)};pooling=true;";
-                Console.WriteLine("entrou aqui3:" + connection);
             }
 
             return connection;
