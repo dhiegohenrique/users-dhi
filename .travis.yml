@@ -6,10 +6,15 @@ notifications:
   email: false
 services:
 - mysql
+- docker
 script:
 - dotnet restore
 - cd UnitTestProject1
 - dotnet test
-before_deploy:
 - cd ..
 - cd WebApplication1
+- dotnet publish 
+- docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+- docker build -t aspnet-on-heroku ./bin/Debug/netcoreapp1.1/publish
+- docker tag aspnet-on-heroku $REGISTRY_URL
+- docker push $REGISTRY_URL
