@@ -13,11 +13,3 @@ script:
 before_deploy:
 - cd ..
 - cd WebApplication1
-deploy:
-  provider: heroku
-  api_key:
-    secure: hIOWUbz5TnAlX0oKe5pM+Oo9kljIAnYz1sIz4TV8eVheLkfqYHSKZFujG4sjRTipW4a2pZqpGMk3kSPm0UDKcfI2F4K8XXn72sddi3Qwemq+ix/evwrxo2Y0P4xbNoVM0pXR9KN6Tq6ypW8KmyHky2mNofibwSJJPKu0L8Z1UrVZje6U9Z40O/u86fqJZCuhTQU2kaBWOqiT90cmxVP+fTM5tkpJ6PGcA+hKIpmq3JXo6AuKNBQvmu9gj0v6JeAZ//I3WwP9YkMuet3xBndVjMJJtws16h92J71XuFuKReaOTxr6hf6//RJhEFUekyKddkY/0A6OE+/4piGwra8cf49XO4RbPHFLgIZX+anAyyVbOaA3GC2s0EbNQIgYf07Xm7KHy0Ni7iwYOZUent1A8BLSD8fiBT6pWjC7x1PYqkABEWmlcsqSZTv4haOo+r6XhqstgrPYIMOPBl7gfdiFIj0lZbbFcls1lo3ygbLRgq+APCW/RTstNSw+L1nFD4aoWZYOVn1dZ8eJYECZh04UH+gHY5AfcaJ1bt2iMrphH6bgY6tELx6bCRalBV1afKFZHZjYEfbrGi66vn/FBUaPx5M+AMbxyLOyAVBFEABnYXDn2YC47T44kA5KMH1hbE9gnq0v9s9tc7zLyubOAjTG8pqri3a0J69ggzNn3cqf8kI=
-  app: users-dhi
-  on:
-    repo: dhiegohenrique/users-dhi
-  skip_cleanup: true

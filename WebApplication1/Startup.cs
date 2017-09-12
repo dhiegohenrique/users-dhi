@@ -121,8 +121,11 @@ namespace WebApplication1
         {
             string connection = Configuration.GetConnectionString("UserContext");
             string envName = Environment.GetEnvironmentVariable("ASPNET_ENV");
+            Console.WriteLine("entrou aqui1:" + envName);
+
             if (envName == null || !envName.ToLower().Equals("Production".ToLower()))
             {
+                Console.WriteLine("entrou aqui2:" + connection);
                 return connection;
             }
 
@@ -131,6 +134,7 @@ namespace WebApplication1
             if (isUrl)
             {
                 connection = $"Server={url.Host};Uid={url.UserInfo.Split(':')[0]};Pwd={url.UserInfo.Split(':')[1]};Database={url.LocalPath.Substring(1)};pooling=true;";
+                Console.WriteLine("entrou aqui3:" + connection);
             }
 
             return connection;
