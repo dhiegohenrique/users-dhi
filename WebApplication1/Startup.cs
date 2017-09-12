@@ -95,7 +95,7 @@ namespace WebApplication1
                 var methods = corsConfig.GetSection("AllowMethods");
                 string[] allowMethods = methods.Get<string[]>();
 
-                if (allowOrigins.Count() == 0)
+                if (allowOrigins == null || allowOrigins.Count() == 0)
                 {
                     builder.AllowAnyOrigin();
                 } else
