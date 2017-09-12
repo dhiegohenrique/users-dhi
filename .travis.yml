@@ -20,3 +20,4 @@ deploy:
   app: users-dhi
   on:
     repo: dhiegohenrique/users-dhi
+  skip_cleanup: true
