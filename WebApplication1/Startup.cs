@@ -40,7 +40,7 @@ namespace WebApplication1
             services.AddMvc();
 
             services.AddDbContext<UserContext>(options =>
-                    options.UseMySql(Configuration.GetConnectionString("UserContext")));
+                    options.UseMySql(this.getConnectionString()));
 
             services.AddTransient<IUserService, UserServiceImpl>();
 
@@ -115,6 +115,25 @@ namespace WebApplication1
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Nome da API");
             });
+        }
+
+        private string getConnectionString()
+        {
+            string connection = Configuration.GetConnectionString("UserContext");
+            string envName = Environment.GetEnvironmentVariable("ASPNET_ENV");
+            if (envName == null || !envName.ToLower().Equals("Production".ToLower()))
+            {
+                return connection;
+            }
+
+            Uri url;
+            bool isUrl = Uri.TryCreate(connection, UriKind.Absolute, out url);
+            if (isUrl)
+            {
+                connection = $"Server={url.Host};Uid={url.UserInfo.Split(':')[0]};Pwd={url.UserInfo.Split(':')[1]};Database={url.LocalPath.Substring(1)};pooling=true;";
+            }
+
+            return connection;
         }
     }
 }
