@@ -85,7 +85,11 @@ namespace UsersDhi
                 this.enableSwagger(app);
             }
 
-            this.createDatabase(app);
+            if (!env.IsProduction())
+            {
+                this.createDatabase(app);
+            }
+
             app.UseMvc();
         }
 
