@@ -16,4 +16,4 @@ script:
 deploy:
  provider: script
  skip_cleanup: true
- script: ssh ./deploy.ssh $DOCKER_USERNAME $DOCKER_PASSWORD $APP_NAME
+ script: sh ./deploy.ssh $DOCKER_USERNAME $DOCKER_PASSWORD $APP_NAME
