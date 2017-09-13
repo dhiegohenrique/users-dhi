@@ -13,11 +13,12 @@ script:
 - dotnet test
 deploy:
  provider: script
+ skip_cleanup: true
  script:
-    - cd ..
-    - cd UsersDhi
-    - dotnet publish 
-    - docker login --username="$DOCKER_USERNAME" --password="$DOCKER_PASSWORD" registry.heroku.com
-    - docker build -t aspnet-on-heroku ./bin/Debug/netcoreapp1.1/publish
-    - docker tag aspnet-on-heroku registry.heroku.com/$APP_NAME/web
-    - docker push registry.heroku.com/$APP_NAME/web
+- cd ..
+- cd UsersDhi
+- dotnet publish 
+- docker login --username="$DOCKER_USERNAME" --password="$DOCKER_PASSWORD" registry.heroku.com
+- docker build -t aspnet-on-heroku ./bin/Debug/netcoreapp1.1/publish
+- docker tag aspnet-on-heroku registry.heroku.com/$APP_NAME/web
+- docker push registry.heroku.com/$APP_NAME/web
