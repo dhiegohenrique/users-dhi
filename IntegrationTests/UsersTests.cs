@@ -239,5 +239,6 @@ namespace IntegrationTests
 
             return user;
         }
+
     }
 }
