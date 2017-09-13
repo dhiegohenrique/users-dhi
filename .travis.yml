@@ -11,6 +11,7 @@ script:
 - dotnet restore
 - cd IntegrationTests
 - dotnet test
+after_success:
 - cd ..
 - cd UsersDhi
 - dotnet publish 
