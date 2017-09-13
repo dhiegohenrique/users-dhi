@@ -45,13 +45,19 @@ namespace UsersDhi
             services.Configure<GzipCompressionProviderOptions>(options => options.Level = System.IO.Compression.CompressionLevel.Optimal);
             services.AddResponseCompression();
 
+            this.configureSwagger(services);
+        }
+
+        private void configureSwagger(IServiceCollection services)
+        {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info {
-                    Title = "Documentação da API",
+                c.SwaggerDoc("v1", new Info
+                {
+                    Title = "Users-Dhi",
                     Version = "v1",
-                    Description = "Descrição da API aqui",
-                    Contact = new Contact { Name = "Dhiego", Email = "dhiego.henrique@hotmail.com", Url = "minhaurl.com.br"}
+                    Description = "Esta documentação descreve as operações de CRUD da API Users-Dhi.",
+                    Contact = new Contact { Name = "Dhiego", Email = "dhiego.henrique@hotmail.com"}
                 });
 
                 string caminhoAplicacao =
@@ -79,7 +85,24 @@ namespace UsersDhi
                 this.enableSwagger(app);
             }
 
+            this.createDatabase(app);
             app.UseMvc();
+        }
+
+        private void enableSwagger(IApplicationBuilder app)
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users-Dhi");
+            });
+        }
+
+        private void createDatabase(IApplicationBuilder app)
+        {
+            var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<UserContext>();
+            context.Database.EnsureCreated();
         }
 
         private IHostingEnvironment CurrentEnvironment { get; set; }
@@ -105,15 +128,6 @@ namespace UsersDhi
 
                 builder.WithMethods(allowMethods);
                 builder.AllowAnyHeader();
-            });
-        }
-
-        private void enableSwagger(IApplicationBuilder app)
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Nome da API");
             });
         }
 
