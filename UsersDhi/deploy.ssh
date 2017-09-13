@@ -1,0 +1,5 @@
+dotnet publish 
+docker login --username="$1" --password="$2" registry.heroku.com
+docker build -t aspnet-on-heroku ./bin/Debug/netcoreapp1.1/publish
+docker tag aspnet-on-heroku registry.heroku.com/$3/web
+docker push registry.heroku.com/$3/web
