@@ -40,7 +40,7 @@ namespace IntegrationTests
                 HttpResponseMessage response = await this.PostAsync(baseUrl, user);
                 User userResponse = await this.GetObjectFromHttpResponseAsync<User>(response);
 
-                Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+                Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
                 Assert.AreNotEqual(0, userResponse.Id);
             }));
         }
