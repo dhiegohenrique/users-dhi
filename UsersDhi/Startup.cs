@@ -31,6 +31,8 @@ namespace UsersDhi
 
         public IConfigurationRoot Configuration { get; }
 
+        private IHostingEnvironment CurrentEnvironment { get; set; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -60,14 +62,10 @@ namespace UsersDhi
                     Contact = new Contact { Name = "Dhiego", Email = "dhiego.henrique@hotmail.com"}
                 });
 
-                string caminhoAplicacao =
-                    PlatformServices.Default.Application.ApplicationBasePath;
-                string nomeAplicacao =
-                    PlatformServices.Default.Application.ApplicationName;
-                string caminhoXmlDoc =
-                    Path.Combine(caminhoAplicacao, $"{nomeAplicacao}.xml");
-
-                c.IncludeXmlComments(caminhoXmlDoc);
+                string pathApp = PlatformServices.Default.Application.ApplicationBasePath;
+                string nameApp = PlatformServices.Default.Application.ApplicationName;
+                string pathXmlDoc = Path.Combine(pathApp, $"{nameApp}.xml");
+                c.IncludeXmlComments(pathXmlDoc);
             });
         }
 
@@ -93,24 +91,6 @@ namespace UsersDhi
             app.UseMvc();
         }
 
-        private void enableSwagger(IApplicationBuilder app)
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users-Dhi");
-            });
-        }
-
-        private void createDatabase(IApplicationBuilder app)
-        {
-            var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
-            var context = serviceScope.ServiceProvider.GetRequiredService<UserContext>();
-            context.Database.EnsureCreated();
-        }
-
-        private IHostingEnvironment CurrentEnvironment { get; set; }
-
         private void enableCors(IApplicationBuilder app)
         {
             app.UseCors(builder =>
@@ -125,7 +105,8 @@ namespace UsersDhi
                 if (allowOrigins == null || allowOrigins.Count() == 0)
                 {
                     builder.AllowAnyOrigin();
-                } else
+                }
+                else
                 {
                     builder.WithOrigins(allowOrigins);
                 }
@@ -133,6 +114,22 @@ namespace UsersDhi
                 builder.WithMethods(allowMethods);
                 builder.AllowAnyHeader();
             });
+        }
+
+        private void enableSwagger(IApplicationBuilder app)
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Users-Dhi");
+            });
+        }
+
+        private void createDatabase(IApplicationBuilder app)
+        {
+            var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<UserContext>();
+            context.Database.EnsureCreated();
         }
 
         private string getConnectionString()

@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using UsersDhi.Models;
 using UsersDhi.Services;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 namespace UsersDhi.Controllers
 {
@@ -17,10 +18,6 @@ namespace UsersDhi.Controllers
         public UserController(IUserService userService)
         {
             this.userService = userService;
-        }
-
-        protected UserController()
-        {
         }
 
         /// <summary>
@@ -39,7 +36,7 @@ namespace UsersDhi.Controllers
         /// </summary>
         /// <response code="200">Usuário retornado com sucesso</response>
         /// <response code="404">Usuário não encontrado</response>
-        [HttpGet("{id}")]
+        [HttpGet("{Id}")]
         [ProducesResponseType(typeof(User), 200)]
         [ProducesResponseType(404)]
         public async Task<IActionResult> GetUser([FromRoute] int id)
@@ -59,13 +56,13 @@ namespace UsersDhi.Controllers
         }
 
         /// <summary>
-        /// Atualiza um usuário.
+        /// Atualiza um usuário pelo ID.
         /// </summary>
-        /// <param name="id">ID do usuário</param>
-        /// <param name="user">Dados do usuário</param>
-        /// <response code="204">Usuário deletado com sucesso</response>
-        /// <response code="500">Erro ao deletar usuário</response>
-        [HttpPut("{id}")]
+        /// <param Name="id">ID do usuário</param>
+        /// <param Name="user">Dados do usuário</param>
+        /// <response code="204">Usuário atualizado com sucesso</response>
+        /// <response code="400">Campos obrigatórios não preenchidos</response>
+        [HttpPut("{Id}")]
         [ProducesResponseType(204)]
         public async Task<IActionResult> PutUser([FromRoute] int id, [FromBody] User user)
         {
@@ -74,22 +71,21 @@ namespace UsersDhi.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != user.id)
+            if (id != user.Id)
             {
-                return BadRequest();
+                return BadRequest("O ID informado não pertence ao usuário");
+            }
+
+            if (!this.userService.UserExists(user.Id))
+            {
+                return NotFound("Usuário não encontrado");
             }
 
             try
             {
-                user.registerdate = DateTime.Now;
                 await this.userService.InsertUpdate(user);
                 return NoContent();
-            }
-            catch (DbUpdateException ex)
-            {
-                return NotFound(ex);
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 return BadRequest(ModelState);
             }
@@ -98,9 +94,10 @@ namespace UsersDhi.Controllers
         /// <summary>
         /// Cadastra um usuário.
         /// </summary>
-        /// <param name="user">Dados do usuário</param>
+        /// <param Name="user">Dados do usuário</param>
         /// <response code="201">Usuário cadastrado com sucesso</response>
-        /// <response code="500">Erro ao cadastrar usuário</response>            
+        /// <response code="400">Campos obrigatórios não preenchidos</response>
+        /// <response code="500">Username já cadastrado</response>
         [HttpPost]
         [ProducesResponseType(typeof(User), 201)]
         public async Task<IActionResult> PostUser([FromBody] User user)
@@ -110,36 +107,37 @@ namespace UsersDhi.Controllers
                 return BadRequest(ModelState);
             }
 
+            if (this.userService.UsernameExists(user.Username))
+            {
+                JsonResult jsonResult = new JsonResult(new { username = $"O username '{user.Username}' já está cadastrado" });
+                jsonResult.StatusCode = StatusCodes.Status500InternalServerError;
+                return jsonResult;
+            }
+
             try
             {
-                user.registerdate = DateTime.Now;
-
+                user.Id = 0;
                 await this.userService.InsertUpdate(user);
-                return CreatedAtAction("GetUser", new { id = user.id }, user);
-            }
-            catch (DbUpdateException ex)
-            {
-                return NotFound(ex);
-            }
-            catch (Exception)
+                return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            } catch (Exception)
             {
                 return BadRequest(ModelState);
             }
         }
 
         /// <summary>
-        /// Deleta um usuário.
+        /// Deleta um usuário pelo ID.
         /// </summary>
-        /// <param name="id">ID do usuário</param>
+        /// <param Name="id">ID do usuário</param>
         /// <response code="204">Usuário deletado com sucesso</response>
         /// <response code="500">Erro ao deletar usuário</response>
-        [HttpDelete("{id}")]
+        [HttpDelete("{Id}")]
         [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteUser([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
+            if (!this.userService.UserExists(id))
             {
-                return BadRequest(ModelState);
+                return NotFound("Usuário não encontrado");
             }
 
             try

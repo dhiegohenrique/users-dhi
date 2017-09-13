@@ -15,5 +15,9 @@ namespace UsersDhi.Services
         Task<int> InsertUpdate(User user);
 
         Task<int> Remove(int id);
+
+        bool UserExists(int id);
+
+        bool UsernameExists(string username);
     }
 }

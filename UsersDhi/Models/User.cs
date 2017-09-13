@@ -11,14 +11,25 @@ namespace UsersDhi.Models
     public class User
     {
         [Key]
-        public int id { get; set; }
-        public string username { get; set; }
-        public string password { get; set; }
-        public int enabled { get; set; }
-        public System.DateTime registerdate { get; set; }
-        public string name { get; set; }
-        public string surname { get; set; }
-        public string email { get; set; }
-        public string phone { get; set; }
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "O username é obrigatório")]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "A senha é obrigatória")]
+        public string Password { get; set; }
+
+        public int Enabled { get; set; }
+
+        public System.DateTime Registerdate { get; set; }
+
+        [Required(ErrorMessage = "O nome é obrigatório")]
+        public string Name { get; set; }
+
+        public string Surname { get; set; }
+
+        public string Email { get; set; }
+
+        public string Phone { get; set; }
     }
 }

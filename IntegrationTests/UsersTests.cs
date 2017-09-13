@@ -16,36 +16,150 @@ using UsersDhi.Models;
 namespace IntegrationTests
 {
     [TestClass]
-    public class UsersTests
+    public class UsersTests : BaseTests
     {
-        private HttpClient client;
-
         private string baseUrl = "/api/user";
 
         private List<User> listUsers;
 
-        private UserContext userContext;
+        [TestMethod]
+        public void ShouldBeReturnStatus201WhenInsertingNewUser()
+        {
+            User user = new User
+            {
+                Name = "newUser",
+                Password = "newSenha",
+                Phone = "9999999999",
+                Surname = "newSobrenome",
+                Username = "newUsername",
+                Email = "newEmail@hotmail.com"
+            };
 
-        public UsersTests() {
-            TestServer server = new TestServer(new WebHostBuilder()
-           .UseContentRoot(this.GetPathProjects() + Path.DirectorySeparatorChar + "UsersDhi")
-           .ConfigureServices((IServiceCollection services) => {
-               services.AddDbContext<UserContext>(dbOptions =>
-                    dbOptions.UseInMemoryDatabase("suntech-test"));
-           })
-           /*.Configure((IApplicationBuilder app) => {
-               app.UseMvc();
-           })*/
-           .UseEnvironment("test")
-           .UseStartup<UsersDhi.Startup>());
-            this.client = server.CreateClient();
-            this.userContext = server.Host.Services.GetService<UserContext>();
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PostAsync(baseUrl, user);
+                User userResponse = await this.GetObjectFromHttpResponseAsync<User>(response);
+
+                Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+                Assert.AreNotEqual(0, userResponse.Id);
+            }));
         }
 
-        private string GetPathProjects()
+        [TestMethod]
+        public void ShouldBeReturnStatus500WhenInsertingNewUserAndUsernameExists()
         {
-            string projectPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-            return projectPath.Remove(projectPath.LastIndexOf(Path.DirectorySeparatorChar));
+            User user = new User
+            {
+                Name = "newUser",
+                Password = "newSenha",
+                Phone = "9999999999",
+                Surname = "newSobrenome",
+                Username = this.listUsers[0].Username,
+                Email = "newEmail@hotmail.com"
+            };
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PostAsync(baseUrl, user);
+                Assert.AreEqual(HttpStatusCode.InternalServerError, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus400WhenInsertingNewUserAndRequiredFieldIsBlank()
+        {
+            User user = new User
+            {
+                Name = "newUser",
+                Password = "newSenha",
+                Phone = "9999999999",
+                Surname = "newSobrenome",
+                Email = "newEmail@hotmail.com"
+            };
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PostAsync(baseUrl, user);
+                Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus204WhenEditingUser()
+        {
+            User user = this.listUsers[0];
+            user.Name = user.Name + " - editado";
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PutAsync(baseUrl + "/" + user.Id, user);
+                Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus400WhenEditingUserAndRequiredFieldsIsBlank()
+        {
+            User user = this.listUsers[0];
+            user.Username = null;
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PutAsync(baseUrl + "/" + user.Id, user);
+                Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus400WhenEditingUserAndIDNotBelongUser()
+        {
+            User user = this.listUsers[0];
+            user.Name = user.Name + " - editado";
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PutAsync(baseUrl + "/" + this.listUsers[1].Id, user);
+                Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus404WhenEditingAUserNotFound()
+        {
+            User user = this.listUsers[0];
+            user.Name = user.Name + " - editado";
+            user.Id = 999;
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.PutAsync(baseUrl + "/" + user.Id, user);
+                Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus204WhenDeletingAUser()
+        {
+            User user = this.listUsers[0];
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.DeleteAsync(baseUrl + "/" + user.Id);
+                Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
+            }));
+        }
+
+        [TestMethod]
+        public void ShouldBeReturnStatus404WhenDeletingAUserNotFound()
+        {
+            User user = this.listUsers[0];
+            user.Id = 999;
+
+            Task.WaitAll(Task.Run(async () =>
+            {
+                HttpResponseMessage response = await this.DeleteAsync(baseUrl + "/" + user.Id);
+                Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+            }));
         }
 
         [TestMethod]
@@ -53,18 +167,13 @@ namespace IntegrationTests
         {
             Task.WaitAll(Task.Run(async () =>
             {
-                HttpResponseMessage response = await this.client.GetAsync(this.baseUrl);
-                response.EnsureSuccessStatusCode();
-
-                string jsonResponse = await response.Content.ReadAsStringAsync();
-                List<User> listUsers = JsonConvert.DeserializeObject<List<User>>(jsonResponse);
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                List<User> listUsers = await this.GetAsync<List<User>>(this.baseUrl);
                 Assert.AreEqual(this.listUsers.Count, listUsers.Count);
 
-                foreach (User user in listUsers)
+                listUsers.ForEach((user) =>
                 {
-                    Assert.AreNotEqual(0, user.id);
-                }
+                    Assert.AreNotEqual(0, user.Id);
+                });
             }));
         }
 
@@ -75,75 +184,19 @@ namespace IntegrationTests
 
             Task.WaitAll(Task.Run(async () =>
             {
-                HttpResponseMessage response = await this.client.GetAsync(this.baseUrl + "/" + user.id);
-                response.EnsureSuccessStatusCode();
-
-                string jsonResponse = await response.Content.ReadAsStringAsync();
-                User userResponse = this.GetUserFromResponse(jsonResponse);
-
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                Assert.AreEqual(JsonConvert.SerializeObject(user), JsonConvert.SerializeObject(userResponse));
+                User userResponse = await this.GetAsync<User>(this.baseUrl + "/" + user.Id);
+                Assert.AreEqual(this.SerializeObject(user), this.SerializeObject(userResponse));
             }));
         }
 
-        [TestMethod]
-        public void ShouldBeInsertNewUser()
-        {
-            User user = new User
-            {
-                name = "newUser",
-                password = "newSenha",
-                phone = "9999999999",
-                registerdate = DateTime.Now,
-                surname = "newSobrenome",
-                username = "newUsername",
-                email = "newEmail@hotmail.com"
-            };
-
-            Task.WaitAll(Task.Run(async () =>
-            {
-                HttpResponseMessage response = await this.client.PostAsync(baseUrl, this.GetStringContent(user));
-                string jsonResponse = await response.Content.ReadAsStringAsync();
-                User userResponse = this.GetUserFromResponse(jsonResponse);
-
-                Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-                Assert.AreNotEqual(0, userResponse.id);
-            }));
-        }
-
-        [TestMethod]
-        public void ShouldBeUpdateUser()
-        {
-            User user = this.listUsers[0];
-            user.name = user.name + " - editado";
-            
-            Task.WaitAll(Task.Run(async () =>
-            {
-                HttpResponseMessage response = await this.client.PutAsync(baseUrl + "/" + user.id, this.GetStringContent(user));
-                Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
-            }));
-        }
-
-        [TestMethod]
-        public void ShouldBeDeleteUser()
-        {
-            User user = this.listUsers[0];
-            
-            Task.WaitAll(Task.Run(async () =>
-            {
-                HttpResponseMessage response = await this.client.DeleteAsync(baseUrl + "/" + user.id);
-                Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
-            }));
-        }
-
-        [TestMethod]
+        /*[TestMethod]
         public void ShouldBeTestWhere()
         {
             string nome = "nome0";
 
             Task.WaitAll(Task.Run(async () =>
             {
-                User user = await this.userContext.User.SingleOrDefaultAsync(u => u.name.ToLower().Contains(nome.ToLower()));
+                User user = await this.userContext.User.SingleOrDefaultAsync(u => u.Name.ToLower().Contains(nome.ToLower()));
                 if (user == null)
                 {
                     Console.WriteLine("usuário não encontrado");
@@ -152,37 +205,15 @@ namespace IntegrationTests
                     Console.WriteLine("usuário encontrado");
                 }
             }));
-        }
-
-        private StringContent GetStringContent(User user)
-        {
-            string json = JsonConvert.SerializeObject(user);
-            return new StringContent(json, UnicodeEncoding.UTF8, "application/json");
-        }
-
-        private User GetUserFromResponse(string response)
-        {
-            return JsonConvert.DeserializeObject<User>(response);
-        }
+        }*/
 
         [TestInitialize]
         public void FillInUsers()
         {
             this.listUsers = new List<User>();
-
             for (int index = 0; index < 5; index++)
             {
-                User user = new User
-                {
-                    name = "Nome" + index + " teste da silva",
-                    password = "senha" + index,
-                    phone = "111111111" + index,
-                    registerdate = DateTime.Now,
-                    surname = "Sobrenome" + index,
-                    username = "username" + index,
-                    email = "email" + index + "@hotmail.com"
-                };
-                this.listUsers.Add(user);
+                this.listUsers.Add(this.CreateUser(index));
             }
 
             this.userContext.User.RemoveRange(this.userContext.User);
@@ -191,6 +222,22 @@ namespace IntegrationTests
             {
                 await this.userContext.SaveChangesAsync();
             }));
+        }
+
+        private User CreateUser(int index)
+        {
+            User user = new User
+            {
+                Name = "Nome" + index + " teste da silva",
+                Password = "senha" + index,
+                Phone = "111111111" + index,
+                Registerdate = DateTime.Now,
+                Surname = "Sobrenome" + index,
+                Username = "Username" + index,
+                Email = "Email" + index + "@hotmail.com"
+            };
+
+            return user;
         }
     }
 }

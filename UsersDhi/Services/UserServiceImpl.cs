@@ -18,37 +18,32 @@ namespace UsersDhi.Services
 
         public List<User> GetAllUsers()
         {
-            return this.userContext.User.OrderBy(user => user.id).ToList();
+            return this.userContext.User.OrderBy(user => user.Id).ToList();
         }
 
         public async Task<User> GetUserById(int id)
         {
-            return await this.userContext.User.SingleOrDefaultAsync(m => m.id == id);
+            return await this.userContext.User.SingleOrDefaultAsync(m => m.Id == id);
         }
 
         public async Task<int> InsertUpdate(User user)
         {
             var entry = this.userContext.Entry(user);
 
-            if (user.id == 0)
+            if (user.Id == 0)
             {
                 entry.State = EntityState.Added;
-            } else 
+                user.Registerdate = DateTime.Now;
+            } else
             {
                 entry.State = EntityState.Modified;
+                entry.Property(u => u.Username).IsModified = false;
+                entry.Property(u => u.Registerdate).IsModified = false;
             }
 
             try
             {
                 return await this.userContext.SaveChangesAsync();
-            } catch (DbUpdateConcurrencyException ex)
-            {
-                if (!UserExists(user.id))
-                {
-                    throw new DbUpdateException("User not found", ex);
-                }
-
-                throw ex;
             } catch (Exception ex)
             {
                 throw ex;
@@ -57,18 +52,28 @@ namespace UsersDhi.Services
 
         public async Task<int> Remove(int id)
         {
-            if (!UserExists(id))
+            try
             {
-                throw new Exception("User not found");
+                this.userContext.User.Remove(new User { Id = id });
+                return await this.userContext.SaveChangesAsync();
+            } catch (Exception ex)
+            {
+                throw ex;
             }
-
-            this.userContext.User.Remove(new User { id = id });
-            return await this.userContext.SaveChangesAsync();
         }
 
-        private bool UserExists(int id)
+        public bool UserExists(int id)
         {
-            return this.userContext.User.Any(e => e.id == id);
+            return this.userContext.User.Any(e => e.Id == id);
+        }
+
+        public bool UsernameExists(string username)
+        {
+            int count = this.userContext.User
+                .Where(user => user.Username.Equals(username))
+                .Count();
+
+            return count > 0;
         }
     }
 }
